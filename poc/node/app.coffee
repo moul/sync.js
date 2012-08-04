@@ -58,7 +58,7 @@ io.sockets.on 'connection', (socket) ->
                 sendAction 'changeColor', { color: color }, defaultLatency
 
         socket.on 'playSound', ->
-                sendAction 'playSound', { url: 'http://rb-mobile.tm.onouo.com/makinasound/sound/sac-merde.mp3' }, defaultLatency
+                sendAction 'playSound', { url: null }, defaultLatency
 
         socket.on 'changeCombo', ->
                 for l in [1..50]

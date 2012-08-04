@@ -84,6 +84,7 @@
                         c: 45
                 s = new Sync options
                 $('input').click ->
+                        console.log $(this).attr('data-action')
                         s.emit $(this).attr('data-action')
                 return s
 

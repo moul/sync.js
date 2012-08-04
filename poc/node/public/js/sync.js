@@ -106,6 +106,7 @@
       };
       s = new Sync(options);
       $('input').click(function() {
+        console.log($(this).attr('data-action'));
         return s.emit($(this).attr('data-action'));
       });
       return s;
