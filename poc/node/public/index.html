@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Sync.js</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script type="text/javascript" src="socket.io/socket.io.js"></script>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.2.6/jquery.min.js"></script>
+    <script type="text/javascript">
+      if (typeof jQuery == 'undefined') {
+        document.write(unescape("%3Cscript src='js/jquery-1.7.2.min.js' type='text/javascript'%3E%3C/script%3E"));
+      }
+    </script>
+    <script type="text/javascript" src="js/sync.js"></script>
+  </head>
+  <body>
+    <!--<h1>Sync.js</h1>-->
+    <input type="button" class="ask" data-action="changeColor" value="changeColor" />
+    <!--<input type="button" class="ask" data-action="doubleChangeColor" value="doubleChangeColor" />-->
+    <input type="button" class="ask" data-action="changeCombo" value="changeCombo" />
+    <input type="button" class="ask" data-action="reloadClients" value="reloadClients" />
+    <input type="button" class="ask" data-action="playSound" value="playSound" />
+    <audio controls="controls" id="sound">
+      <source src="http://www.universal-soundbank.com/mp3/sounds/7726.MP3" type="audio/mp3" autoplay="false" />
+    </audio>
+  </body>
+</html>
