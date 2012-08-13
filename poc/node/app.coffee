@@ -37,9 +37,6 @@ io.sockets.on 'connection', (socket) ->
         socket.on 'getTime', (data) ->
                 i++
                 console.log data
-                #data.id = socket.id
-                #users[i] = data
-                #socket.player = users[i]
                 time = getTime()
                 callWithRandomLatency ->
                         socket.json.emit 'setTime', { time: time, i: i, users: io.sockets.clients().length }
@@ -87,10 +84,10 @@ sendAction = (action, args, latency) ->
 console.log ""
 server.listen 1337
 
-#process.on 'uncaughtException', (-> console.log 'EXIT')
-#process.on 'exit', (-> console.log 'EXIT')
-#process.on 'SIGTERM', (-> console.log 'EXIT')
-#process.on 'SIGKILL', (-> console.log 'EXIT')
-#process.on 'SIGHUP', (-> console.log 'EXIT')
+process.on 'uncaughtException', (-> console.log 'EXIT')
+process.on 'exit', (-> console.log 'EXIT')
+process.on 'SIGTERM', (-> console.log 'EXIT')
+process.on 'SIGKILL', (-> console.log 'EXIT')
+process.on 'SIGHUP', (-> console.log 'EXIT')
 
 console.log "Server is listening on port %d in %s mode", server.address().port, app.settings.env
