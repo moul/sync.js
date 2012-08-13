@@ -1,0 +1,95 @@
+<!DOCTYPE html>  <html> <head>   <title>app.coffee</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               app.coffee             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>                            </td>             <td class="code">               <div class="highlight"><pre><span class="nv">express = </span><span class="nx">require</span> <span class="s">&#39;express&#39;</span>
+<span class="nv">io = </span><span class="nx">require</span> <span class="s">&#39;socket.io&#39;</span>
+
+<span class="nv">app = module.exports = </span><span class="nx">express</span><span class="p">()</span>
+<span class="nv">http = </span><span class="nx">require</span> <span class="s">&#39;http&#39;</span>
+<span class="nv">server = </span><span class="nx">http</span><span class="p">.</span><span class="nx">createServer</span> <span class="nx">app</span>
+<span class="nv">io = </span><span class="nx">require</span><span class="p">(</span><span class="s">&#39;socket.io&#39;</span><span class="p">).</span><span class="nx">listen</span> <span class="nx">server</span>
+
+<span class="nx">app</span><span class="p">.</span><span class="nx">configure</span> <span class="o">-&gt;</span>
+        <span class="nx">app</span><span class="p">.</span><span class="nx">use</span> <span class="nx">express</span><span class="p">.</span><span class="nx">static</span><span class="p">(</span><span class="s">&quot;</span><span class="si">#{</span><span class="nx">__dirname</span><span class="si">}</span><span class="s">/public&quot;</span><span class="p">)</span>
+
+<span class="nx">app</span><span class="p">.</span><span class="nx">configure</span> <span class="s">&#39;development&#39;</span><span class="p">,</span> <span class="o">-&gt;</span>
+        <span class="nx">app</span><span class="p">.</span><span class="nx">use</span> <span class="nx">express</span><span class="p">.</span><span class="nx">errorHandler</span><span class="p">({</span>
+                <span class="nv">dumpExceptions: </span><span class="kc">true</span>
+                <span class="nv">showStack: </span><span class="kc">true</span>
+                <span class="p">})</span>
+
+<span class="nx">app</span><span class="p">.</span><span class="nx">configure</span> <span class="s">&#39;production&#39;</span><span class="p">,</span> <span class="o">-&gt;</span>
+        <span class="nx">app</span><span class="p">.</span><span class="nx">use</span> <span class="nx">express</span><span class="p">.</span><span class="nx">errorHandler</span><span class="p">()</span>
+
+<span class="nv">defaultLatency = </span><span class="mi">1000</span>
+
+<span class="nv">users = </span><span class="p">[]</span>
+<span class="nv">i = </span><span class="mi">0</span>
+
+<span class="nv">bgcolorlist = </span><span class="p">[</span> <span class="s">&quot;</span><span class="err">#</span><span class="s">FF0000&quot;</span><span class="p">,</span> <span class="s">&quot;</span><span class="err">#</span><span class="s">00FF00&quot;</span><span class="p">,</span> <span class="s">&quot;</span><span class="err">#</span><span class="s">0000FF&quot;</span><span class="p">,</span> <span class="s">&quot;</span><span class="err">#</span><span class="s">FFFF00&quot;</span><span class="p">,</span> <span class="s">&quot;</span><span class="err">#</span><span class="s">FF00FF&quot;</span><span class="p">,</span> <span class="s">&quot;</span><span class="err">#</span><span class="s">00FFFF&quot;</span> <span class="p">]</span>
+<span class="nv">color = </span><span class="s">&#39;#000000&#39;</span>
+<span class="nv">i = </span><span class="mi">0</span>
+
+<span class="nv">getTime = </span><span class="o">-&gt;</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="nb">Date</span><span class="p">().</span><span class="nx">getTime</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1337704000000</span>
+
+<span class="nx">io</span><span class="p">.</span><span class="nx">sockets</span><span class="p">.</span><span class="kc">on</span> <span class="s">&#39;connection&#39;</span><span class="p">,</span> <span class="nf">(socket) -&gt;</span>
+        <span class="nx">socket</span><span class="p">.</span><span class="kc">on</span> <span class="s">&#39;disconnect&#39;</span><span class="p">,</span> <span class="o">-&gt;</span>
+                <span class="nx">i</span><span class="o">--</span>
+
+        <span class="nx">socket</span><span class="p">.</span><span class="kc">on</span> <span class="s">&#39;getTime&#39;</span><span class="p">,</span> <span class="nf">(data) -&gt;</span>
+                <span class="nx">i</span><span class="o">++</span>
+                <span class="nx">console</span><span class="p">.</span><span class="nx">log</span> <span class="nx">data</span>
+                <span class="nv">time = </span><span class="nx">getTime</span><span class="p">()</span>
+                <span class="nx">callWithRandomLatency</span> <span class="o">-&gt;</span>
+                        <span class="nx">socket</span><span class="p">.</span><span class="nx">json</span><span class="p">.</span><span class="nx">emit</span> <span class="s">&#39;setTime&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nv">time: </span><span class="nx">time</span><span class="p">,</span> <span class="nv">i: </span><span class="nx">i</span><span class="p">,</span> <span class="nv">users: </span><span class="nx">io</span><span class="p">.</span><span class="nx">sockets</span><span class="p">.</span><span class="nx">clients</span><span class="p">().</span><span class="nx">length</span> <span class="p">}</span>
+                <span class="p">,</span> <span class="mi">0</span>
+
+        <span class="nx">socket</span><span class="p">.</span><span class="kc">on</span> <span class="s">&#39;checkDiff&#39;</span><span class="p">,</span> <span class="nf">(data) -&gt;</span>
+                <span class="nv">latency = </span><span class="nx">getTime</span><span class="p">()</span> <span class="o">-</span> <span class="nx">data</span><span class="p">.</span><span class="nx">estimatedTime</span>
+                <span class="nx">console</span><span class="p">.</span><span class="nx">log</span> <span class="s">&#39;&#39;</span>
+                <span class="nx">console</span><span class="p">.</span><span class="nx">log</span> <span class="s">&#39;checkDiff&#39;</span><span class="p">,</span> <span class="nx">data</span>
+                <span class="nx">console</span><span class="p">.</span><span class="nx">log</span> <span class="nx">getTime</span><span class="p">()</span>
+                <span class="nx">console</span><span class="p">.</span><span class="nx">log</span> <span class="nx">latency</span>
+                <span class="nx">console</span><span class="p">.</span><span class="nx">log</span> <span class="s">&#39;&#39;</span>
+
+        <span class="nx">socket</span><span class="p">.</span><span class="kc">on</span> <span class="s">&#39;changeColor&#39;</span><span class="p">,</span> <span class="o">-&gt;</span>
+                <span class="nv">color = </span><span class="nx">bgcolorlist</span><span class="p">[</span><span class="nx">i</span><span class="o">++</span> <span class="o">%</span> <span class="nx">bgcolorlist</span><span class="p">.</span><span class="nx">length</span><span class="p">]</span>
+                <span class="nx">sendAction</span> <span class="s">&#39;changeColor&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nv">color: </span><span class="nx">color</span> <span class="p">},</span> <span class="nx">defaultLatency</span>
+
+        <span class="nx">socket</span><span class="p">.</span><span class="kc">on</span> <span class="s">&#39;playSound&#39;</span><span class="p">,</span> <span class="o">-&gt;</span>
+                <span class="nx">sendAction</span> <span class="s">&#39;playSound&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nv">url: </span><span class="kc">null</span> <span class="p">},</span> <span class="nx">defaultLatency</span>
+
+        <span class="nx">socket</span><span class="p">.</span><span class="kc">on</span> <span class="s">&#39;changeCombo&#39;</span><span class="p">,</span> <span class="o">-&gt;</span>
+                <span class="k">for</span> <span class="nx">l</span> <span class="k">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">..</span><span class="mi">50</span><span class="p">]</span>
+                        <span class="nv">color = </span><span class="nx">bgcolorlist</span><span class="p">[</span><span class="nx">i</span><span class="o">++</span> <span class="o">%</span> <span class="nx">bgcolorlist</span><span class="p">.</span><span class="nx">length</span><span class="p">]</span>
+                        <span class="nx">sendAction</span> <span class="s">&#39;changeColor&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nv">color: </span><span class="nx">color</span> <span class="p">},</span> <span class="nx">defaultLatency</span> <span class="o">+</span> <span class="mi">500</span> <span class="o">*</span> <span class="nx">l</span>
+
+
+        <span class="nx">socket</span><span class="p">.</span><span class="kc">on</span> <span class="s">&#39;reloadClients&#39;</span><span class="p">,</span> <span class="o">-&gt;</span>
+                <span class="nx">sendAction</span> <span class="s">&#39;reload&#39;</span><span class="p">,</span> <span class="kc">null</span><span class="p">,</span> <span class="nx">defaultLatency</span>
+
+<span class="nv">callWithRandomLatency = </span><span class="nf">(fn, latency) -&gt;</span>
+        <span class="k">if</span> <span class="kc">true</span>
+                <span class="nx">setTimeout</span> <span class="nx">fn</span><span class="p">,</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">random</span><span class="p">()</span> <span class="o">*</span> <span class="nx">latency</span>
+        <span class="k">else</span>
+                <span class="nx">fn</span><span class="p">()</span>
+
+<span class="nv">sendAction = </span><span class="nf">(action, args, latency) -&gt;</span>
+        <span class="nv">data = </span><span class="p">{</span> <span class="nv">action: </span><span class="nx">action</span><span class="p">,</span> <span class="nv">args: </span><span class="nx">args</span><span class="p">,</span> <span class="nv">time: </span><span class="nx">getTime</span><span class="p">()</span> <span class="o">+</span> <span class="nx">latency</span> <span class="o">+</span> <span class="mi">300</span> <span class="p">}</span>
+        <span class="nx">io</span><span class="p">.</span><span class="nx">sockets</span><span class="p">.</span><span class="nx">clients</span><span class="p">().</span><span class="nx">forEach</span> <span class="nf">(socket) -&gt;</span>
+                <span class="nv">data.tim2 = </span><span class="nx">getTime</span><span class="p">()</span>
+                <span class="nx">callWithRandomLatency</span> <span class="p">(</span><span class="o">-&gt;</span>
+                        <span class="nv">data.tim3 = </span><span class="nx">getTime</span><span class="p">()</span>
+                        <span class="nx">socket</span><span class="p">.</span><span class="nx">json</span><span class="p">.</span><span class="nx">emit</span> <span class="s">&#39;addAction&#39;</span><span class="p">,</span> <span class="nx">data</span>
+                        <span class="p">),</span> <span class="nx">latency</span>
+
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span> <span class="s">&quot;&quot;</span>
+<span class="nx">server</span><span class="p">.</span><span class="nx">listen</span> <span class="mi">1337</span>
+
+<span class="nx">process</span><span class="p">.</span><span class="kc">on</span> <span class="s">&#39;uncaughtException&#39;</span><span class="p">,</span> <span class="p">(</span><span class="o">-&gt;</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span> <span class="s">&#39;EXIT&#39;</span><span class="p">)</span>
+<span class="nx">process</span><span class="p">.</span><span class="kc">on</span> <span class="s">&#39;exit&#39;</span><span class="p">,</span> <span class="p">(</span><span class="o">-&gt;</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span> <span class="s">&#39;EXIT&#39;</span><span class="p">)</span>
+<span class="nx">process</span><span class="p">.</span><span class="kc">on</span> <span class="s">&#39;SIGTERM&#39;</span><span class="p">,</span> <span class="p">(</span><span class="o">-&gt;</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span> <span class="s">&#39;EXIT&#39;</span><span class="p">)</span>
+<span class="nx">process</span><span class="p">.</span><span class="kc">on</span> <span class="s">&#39;SIGKILL&#39;</span><span class="p">,</span> <span class="p">(</span><span class="o">-&gt;</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span> <span class="s">&#39;EXIT&#39;</span><span class="p">)</span>
+<span class="nx">process</span><span class="p">.</span><span class="kc">on</span> <span class="s">&#39;SIGHUP&#39;</span><span class="p">,</span> <span class="p">(</span><span class="o">-&gt;</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span> <span class="s">&#39;EXIT&#39;</span><span class="p">)</span>
+
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span> <span class="s">&quot;Server is listening on port %d in %s mode&quot;</span><span class="p">,</span> <span class="nx">server</span><span class="p">.</span><span class="nx">address</span><span class="p">().</span><span class="nx">port</span><span class="p">,</span> <span class="nx">app</span><span class="p">.</span><span class="nx">settings</span><span class="p">.</span><span class="nx">env</span>
+
+</pre></div>             </td>           </tr>                </tbody>     </table>   </div> </body> </html> 
