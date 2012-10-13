@@ -2,7 +2,7 @@
 
         pluginName = 'sync'
         document = window.document
-        log = () -> console.log.apply console, arguments
+        log = -> console.log.apply console, arguments
         defaults =
                 a: 42
                 b: 43
@@ -12,8 +12,10 @@
                         @connected = false
                         @options = $.extend {}, defaults, options
                         @socket = null
-                        @keepConnection()
+                        do @keepConnection
                         return @
+
+                getTime: -> new Date().getTime()
 
                 keepConnection: ->
                         that = @
@@ -38,19 +40,19 @@
 
                         @socket.on 'setTime', (data) ->
                                 socket = @
-                                that.serverDiff = data.time - new Date().getTime()
+                                that.serverDiff = data.time - do @getTime
                                 console.log 'i', data.i
                                 console.log 'users', data.users
                                 console.log 'serverDiff', that.serverDiff
                                 setTimeout (->
-                                        estimatedServerTime = new Date().getTime() + that.serverDiff
+                                        estimatedServerTime = do @getTime + that.serverDiff
                                         socket.emit 'checkDiff', { diff: that.serverDiff, estimatedTime: estimatedServerTime }
                                         ), Math.random() * 100
 
 
-                        @socket.on 'addAction', (data) ->
+                        @socket.on 'addAction', (data) =>
                                 console.log 'addAction', data
-                                time = new Date().getTime()
+                                time = do @getTime
                                 estimatedServerTime = time + that.serverDiff
                                 diff = data.time - estimatedServerTime
                                 console.log 'diff', diff

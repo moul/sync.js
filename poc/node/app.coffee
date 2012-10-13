@@ -1,52 +1,42 @@
 express = require 'express'
-io = require 'socket.io'
-
-app = module.exports = express()
+app = module.exports = do express
 http = require 'http'
 server = http.createServer app
 io = require('socket.io').listen server
 
 app.configure ->
-        app.use express.static("#{__dirname}/public")
+        app.use express.static "#{__dirname}/public"
 
 app.configure 'development', ->
-        app.use express.errorHandler({
+        app.use express.errorHandler
                 dumpExceptions: true
                 showStack: true
-                })
 
 app.configure 'production', ->
-        app.use express.errorHandler()
+        app.use do express.errorHandler
 
 defaultLatency = 1000
-
 users = []
-i = 0
-
 bgcolorlist = [ "#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#FF00FF", "#00FFFF" ]
 color = '#000000'
 i = 0
 
-getTime = ->
-        return new Date().getTime() - 1337704000000
+getTime = -> new Date().getTime() - 1337817342
 
 io.sockets.on 'connection', (socket) ->
-        socket.on 'disconnect', ->
-                i--
+        socket.on 'disconnect', -> i--
 
         socket.on 'getTime', (data) ->
                 i++
                 console.log data
                 time = getTime()
-                callWithRandomLatency ->
-                        socket.json.emit 'setTime', { time: time, i: i, users: io.sockets.clients().length }
-                , 0
+                callWithRandomLatency -> (socket.json.emit 'setTime', { time: time, i: i, users: io.sockets.clients().length }), 0
 
         socket.on 'checkDiff', (data) ->
-                latency = getTime() - data.estimatedTime
+                latency = do getTime - data.estimatedTime
                 console.log ''
                 console.log 'checkDiff', data
-                console.log getTime()
+                console.log do getTime
                 console.log latency
                 console.log ''
 
@@ -68,16 +58,16 @@ io.sockets.on 'connection', (socket) ->
 
 callWithRandomLatency = (fn, latency) ->
         if true
-                setTimeout fn, Math.random() * latency
+                setTimeout fn, do Math.random * latency
         else
-                fn()
+                do fn
 
 sendAction = (action, args, latency) ->
-        data = { action: action, args: args, time: getTime() + latency + 300 }
+        data = { action: action, args: args, time: do getTime + latency + 300 }
         io.sockets.clients().forEach (socket) ->
-                data.tim2 = getTime()
+                data.tim2 = do getTime
                 callWithRandomLatency (->
-                        data.tim3 = getTime()
+                        data.tim3 = do getTime
                         socket.json.emit 'addAction', data
                         ), latency
 
